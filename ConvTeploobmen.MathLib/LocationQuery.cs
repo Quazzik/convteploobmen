@@ -8,7 +8,7 @@ namespace ConvTeploobmen.MathLib
 {
     public enum LocationQuery
     {
-        Chess,
-        Row
+        Шахматное,
+        Коридорное
     }
 }

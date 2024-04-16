@@ -43,7 +43,7 @@ namespace ConvTeploobmen.MathLib
                 ? 0.56 * aas * Pow(re, 0.5) * Pow(pr, 0.36)
                 : _inputData.LocationQuery switch
                     {
-                        LocationQuery.Chess => 0.4 * aas * Pow(re, 0.6) * Pow(pr, 0.36),
+                        LocationQuery.Шахматное => 0.4 * aas * Pow(re, 0.6) * Pow(pr, 0.36),
                         _ => 0.22 * aas * Pow(re, 0.65) * Pow(pr, 0.36)
                     };
         }

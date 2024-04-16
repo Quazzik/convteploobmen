@@ -17,7 +17,7 @@ namespace ConvTeploobmen.Tests
                 KinematicViscosity = 1,
                 AttackAngle = 90,
                 Temperature = 20,
-                LocationQuery = LocationQuery.Row
+                LocationQuery = LocationQuery.Коридорное
             };
             _lib = new(_inputData);
         }
