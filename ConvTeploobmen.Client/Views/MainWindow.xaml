@@ -96,7 +96,31 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                 <RowDefinition Height="1*"/>
                 <RowDefinition Height="3*"/>
             </Grid.RowDefinitions>
-            
+            <materialDesign:Card Grid.Row="0" Style="{StaticResource FirstCard}">
+                <StackPanel>
+                    <Grid Height="165">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" HorizontalAlignment="Center" Margin="5 0 5 5">Число Рейнольдса</Label>
+                        <TextBlock Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" Style="{StaticResource MaterialDesignOverlineTextBlock}">value</TextBlock>
+                        <Label Grid.Column="1" HorizontalAlignment="Center" Margin="5 0 5 5">Значение угла атаки</Label>
+                        <TextBlock Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" Style="{StaticResource MaterialDesignOverlineTextBlock}">value</TextBlock>
+                        <Label Grid.Column="2" HorizontalAlignment="Center" Margin="5 0 5 5">Число Прандтля</Label>
+                        <TextBlock Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" Style="{StaticResource MaterialDesignOverlineTextBlock}">value</TextBlock>
+                        <Label Grid.Column="3" HorizontalAlignment="Center" Margin="5 0 5 5">Число Нуссельта</Label>
+                        <TextBlock Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" Style="{StaticResource MaterialDesignOverlineTextBlock}">value</TextBlock>
+                    </Grid>
+                </StackPanel>
+            </materialDesign:Card>
+            <materialDesign:Card Grid.Row="1" Style="{StaticResource FirstCard}">
+                <StackPanel>
+
+                </StackPanel>
+            </materialDesign:Card>
         </Grid>
     </Grid>
 </rxui:ReactiveWindow>
