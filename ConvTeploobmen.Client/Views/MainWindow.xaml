@@ -1,0 +1,102 @@
+﻿<rxui:ReactiveWindow x:Class="ConvTeploobmen.Client.MainWindow"
+                     x:TypeArguments="vms:MainWinViewModel"
+        xmlns:rxui="http://reactiveui.net"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vms="clr-namespace:ConvTeploobmen.Client.ViewModels"
+        xmlns:cnv="clr-namespace:ConvTeploobmen.Client.Converters"
+        xmlns:local="clr-namespace:ConvTeploobmen.Client"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+     TextElement.FontWeight="Regular"
+     TextElement.FontSize="13"
+     TextOptions.TextFormattingMode="Ideal"
+     TextOptions.TextRenderingMode="Auto"
+     Background="{DynamicResource MaterialDesignPaper}"
+     FontFamily="{DynamicResource MaterialDesignFont}"
+        Title="MainWindow" Height="758" Width="1188">
+    <Window.Resources>
+
+        <cnv:EnumToItemsConverter x:Key="EnumToI"/>
+        <cnv:PercentToStringConverter x:Key="PercToS"/>
+        <cnv:StringToNumberConverter x:Key="StrToN"/>
+        
+        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}" x:Key="verticalTB">
+            <Setter Property="Margin" Value="0 5 0 0"/>
+        </Style>
+
+        <Style TargetType="materialDesign:Card" x:Key="FirstCard">
+            <Setter Property="UniformCornerRadius" Value="15"/>
+            <Setter Property="Margin" Value="10"/>
+        </Style>
+        <Style TargetType="StackPanel" x:Key="Vertical">
+            <Setter Property="Orientation" Value="Vertical"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </Window.Resources>
+    <Window.DataContext>
+        <vms:MainWinViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="1.5*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <materialDesign:Card Grid.Column="1" Style="{StaticResource FirstCard}">
+            <StackPanel Style="{StaticResource Vertical}">
+                <Label HorizontalAlignment="Center" Content="{Binding TotalPercent, Converter ={StaticResource PercToS}}"></Label>
+                <ListView ItemsSource="{Binding GasElements}" d:ItemsSource="{d:SampleData ItemCount=5}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Width="270">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ComboBox ItemsSource="{Binding Gases}" Grid.Column="0" Margin="5 0 5 0"/>
+                                <TextBox Grid.Column="1" Margin="5 0 5 8" Text="{Binding GasQuantity, Delay=500, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                <Button Background="Red" Command="{Binding RemoveGasElementCommand}" BorderThickness="0" Grid.Column="2" Margin="5 0 5 0" Height="40" Width="40">X</Button>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <Button Command="{Binding AddGasElementCommand}" Margin="10 10 10 0" Content="Добавить газ"></Button>
+            </StackPanel>
+        </materialDesign:Card>
+        <materialDesign:Card Grid.Column="0" Grid.Row="0"  Style="{StaticResource FirstCard}" Padding="5">
+        <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="5*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Column="0" Grid.Row="0">
+                <Label>Скорость потока</Label>
+                <TextBox Style="{StaticResource verticalTB}"/>
+                <Label>Диаметр трубы</Label>
+                <TextBox Style="{StaticResource verticalTB}"/>
+                <Label>Кинематическая вязкость (исп.)</Label>
+                <TextBox Style="{StaticResource verticalTB}"/>
+                <Label>Угол атаки</Label>
+                <TextBox Style="{StaticResource verticalTB}"/>
+                <Label>Температура</Label>
+                <TextBox Style="{StaticResource verticalTB}"/>
+                <Label>Расположение труб</Label>
+                <ComboBox ItemsSource="{Binding LocationQuery, Converter={StaticResource EnumToI}}" SelectedItem="{Binding LocationQuery}"/>
+                </StackPanel>
+            <Button Content="Рассчитать" Margin="10 0 10 0" Grid.Column="0" Grid.Row="1"/>
+            </Grid>
+        </materialDesign:Card>
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="3*"/>
+            </Grid.RowDefinitions>
+            
+        </Grid>
+    </Grid>
+</rxui:ReactiveWindow>
