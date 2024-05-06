@@ -8,10 +8,8 @@ using System.Threading.Tasks;
 
 namespace ConvTeploobmen.Client.DataBase
 {
-    public class ConvTeploobDbConvtext : DbContext
+    public class ConvTeploobDbContext : DbContext
     {
-        public DbSet<Gas> Gases { get; set; }
-
         public DbSet<Prandtl> Prandtls { get; set; }
         
         public DbSet<AttackAngle> AttackAngles { get; set; }
@@ -235,89 +233,6 @@ namespace ConvTeploobmen.Client.DataBase
                     Value = 0.722
                 }
                 );
-
-            modelBuilder
-                .Entity<Gas>()
-                .HasData(new Gas()
-                {
-                    Name = "CH4",
-                    KinematicViscosity = 11.13
-                },
-                new Gas()
-                {
-                    Name = "C2H6",
-                    KinematicViscosity = 10.47
-                },
-                new Gas()
-                {
-                    Name = "C3H8",
-                    KinematicViscosity = 9.70
-                },
-                new Gas()
-                {
-                    Name = "C4H10",
-                    KinematicViscosity = 8.76
-                },
-                new Gas()
-                {
-                    Name = "CO",
-                    KinematicViscosity = 14.87
-                },
-                new Gas()
-                {
-                    Name = "CO2",
-                    KinematicViscosity = 15.61
-                },
-                new Gas()
-                {
-                    Name = "N2",
-                    KinematicViscosity = 16.81
-                },
-                new Gas()
-                {
-                    Name = "O2",
-                    KinematicViscosity = 17.65
-                },
-                new Gas()
-                {
-                    Name = "H2",
-                    KinematicViscosity = 8.76
-                },
-                new Gas()
-                {
-                    Name = "C5H12",
-                    KinematicViscosity = 7.91
-                },
-                new Gas()
-                {
-                    Name = "C6H14",
-                    KinematicViscosity = 7.04
-                },
-                new Gas()
-                {
-                    Name = "Ar",
-                    KinematicViscosity = 20.75
-                },
-                new Gas()
-                {
-                    Name = "He",
-                    KinematicViscosity = 17.76
-                },
-                new Gas()
-                {
-                    Name = "Ne",
-                    KinematicViscosity = 17.72
-                },
-                new Gas()
-                {
-                    Name = "Kr",
-                    KinematicViscosity = 19.65
-                },
-                new Gas()
-                {
-                    Name = "Xe",
-                    KinematicViscosity = 21.18
-                });
             base.OnModelCreating(modelBuilder);
         }
     }

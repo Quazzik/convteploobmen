@@ -14,12 +14,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Printing;
 using Microsoft.EntityFrameworkCore;
+using ConvTeploobmen.Client.DataBase;
+using SQLitePCL;
+using System.Windows;
+using Windows.Security.Authentication.Web.Core;
 
 namespace ConvTeploobmen.Client.ViewModels
 {
     public class MainWinViewModel : ReactiveObject
     {
-        private DbContext DbContext;
+        private ConvTeploobDbContext _context;
         private const int MAX_GAS_ELEMENTS_COUNT = 9;
         private const int MAX_ATTACK_ANGLE = 90;
         private InputData _inputData = new();
@@ -27,28 +31,20 @@ namespace ConvTeploobmen.Client.ViewModels
 
         public MainWinViewModel()
         {
-
-            AddGasElementCommand = ReactiveCommand.Create(AddGasElement, 
-                this.WhenAnyValue(vm => vm.GasElements.Count)
-                .Select(count => count <= MAX_GAS_ELEMENTS_COUNT));
-            List<string> gases = [ // dBContext.Gases.ToList();
+            List<string> Gases = [
                 "CO2",
-                "CH4",
-                "O2",
-                "N2",
-                "CO",
                 "H2O",
-                "C2H6"
+                "O2",
+                "N2"
             ];
-            Gases = new(gases);
-        }
+            foreach (var g in Gases)
+            {
+                _context = new ConvTeploobDbContext();
+                _calculateCommand = ReactiveCommand.Create(Calculate);
 
-        private ObservableCollection<string> _gases = [];
-
-        public ObservableCollection<string> Gases
-        {
-            get => _gases;
-            set => this.RaiseAndSetIfChanged(ref _gases, value);
+                var newGasEl = new GasElementViewModel(this, g);
+                GasElements.Add(newGasEl);
+            }
         }
 
         public double Nu
@@ -188,14 +184,6 @@ namespace ConvTeploobmen.Client.ViewModels
             set => this.RaiseAndSetIfChanged(ref _gasElements, value);
         }
 
-        public ReactiveCommand<Unit, Unit> AddGasElementCommand { get; set; }
-
-        private void AddGasElement()
-        {
-            var newGasEl = new GasElementViewModel(this, Gases);
-            GasElements.Add(newGasEl);
-        }
-
         private double _totalPercent;
 
         public double TotalPercent
@@ -204,11 +192,63 @@ namespace ConvTeploobmen.Client.ViewModels
             set => this.RaiseAndSetIfChanged(ref _totalPercent, value);
         }
 
-        public ReactiveCommand<Unit,Unit> CalculateCommand { get; set; }
+        private ReactiveCommand<Unit, Unit> _calculateCommand;
+        public ReactiveCommand<Unit, Unit> CalculateCommand => _calculateCommand;
 
         private void Calculate()
         {
-            
+#pragma warning disable CS8602
+
+            _inputData.AttackAngleValue = Getaav(_inputData.AttackAngle);
+
+
         }
+        private double Findaav(double mark, double angle)
+        {
+            var deltatemp = angle % 10;
+            var valuemore = _context.AttackAngles.FirstOrDefault(a => a.Degree == mark).Value;
+            var valueless = _context.AttackAngles.FirstOrDefault(a => a.Degree == mark - 10).Value;
+            var value = valuemore - valueless;
+            var res = value / 10 * deltatemp + valueless;
+            return res;
+        }
+
+        private double Getaav(double angle)
+        {
+            if (angle > 90) angle = angle % 90;
+            if (angle <= 0) { MessageBox.Show("Значение угла атаки указано неверно"); return 0; }
+            else
+            {
+                if (angle % 10 == 0)
+                {
+                    return _context
+                        .AttackAngles
+                        .FirstOrDefault(a => a.Degree == angle)
+                        .Value;
+                }
+                else
+                {
+                    int mark;
+                    var angles = _context.AttackAngles.ToArray();
+                    if (angle > 10)
+                    {
+
+                        for (int i = 0; i != angles.Length; i++)
+                        {
+                            if (angle < angles[i].Degree)
+                            {
+                                mark = (i + 1) * 10;
+                                return Findaav(mark, angle);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return angles[0].Value / 10 * angle;
+                    }
+                }
+            }return 0;
+        }
+#pragma warning restore CS8602
     }
 }

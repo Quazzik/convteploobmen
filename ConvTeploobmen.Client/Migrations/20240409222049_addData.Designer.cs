@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ConvTeploobmen.App.Migrations
 {
-    [DbContext(typeof(ConvTeploobDbConvtext))]
+    [DbContext(typeof(ConvTeploobDbContext))]
     [Migration("20240409222049_addData")]
     partial class addData
     {

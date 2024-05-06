@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ConvTeploobmen.App.Migrations
 {
-    [DbContext(typeof(ConvTeploobDbConvtext))]
+    [DbContext(typeof(ConvTeploobDbContext))]
     partial class ConvTeploobDbConvtextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

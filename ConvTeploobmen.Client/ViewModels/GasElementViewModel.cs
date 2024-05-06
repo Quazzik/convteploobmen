@@ -17,23 +17,13 @@ namespace ConvTeploobmen.Client.ViewModels
     public class GasElementViewModel : ReactiveObject
     {
         private readonly MainWinViewModel _parent;
-        private GasRecordViewModel _gasName;
         private double _gasQuantity;
+        public string gasName { get; set; }
 
-        public GasElementViewModel(MainWinViewModel parent, ObservableCollection<string> gases)
+        public GasElementViewModel(MainWinViewModel parent, string gas)
         {
             _parent = parent;
-            Gases = gases;
-            RemoveGasElementCommand = ReactiveCommand.Create(RemoveGasElement);
-        }
-
-        public GasRecordViewModel GasName
-        {
-            get => _gasName;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _gasName, value);
-            }
+            gasName = gas;
         }
 
         public double GasQuantity
@@ -46,15 +36,6 @@ namespace ConvTeploobmen.Client.ViewModels
                 _parent.TotalPercent += value - _gasQuantity;
                 this.RaiseAndSetIfChanged(ref _gasQuantity, value);
             }
-        }
-
-        public ReactiveCommand<Unit, Unit> RemoveGasElementCommand { get; set; }
-        public ObservableCollection<string> Gases { get; set; }
-
-        private void RemoveGasElement()
-        {
-            _parent.TotalPercent -= GasQuantity;
-            _parent.GasElements.Remove(this);
         }
     }
 }

@@ -62,18 +62,16 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         <materialDesign:Card Grid.Column="1" Style="{StaticResource FirstCard}">
             <StackPanel Style="{StaticResource Vertical}">
                 <Label HorizontalAlignment="Center" Content="{Binding TotalPercent, Converter ={StaticResource PercToS}}"></Label>
-                <ListView ItemsSource="{Binding GasElements}" d:ItemsSource="{d:SampleData ItemCount=5}">
+                <ListView ItemsSource="{Binding GasElements}" d:ItemsSource="{d:SampleData ItemCount=4}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Grid Width="270">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="2*"/>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <ComboBox ItemsSource="{Binding Gases}" Grid.Column="0" Margin="5 0 5 0"/>
-                                <TextBox Grid.Column="1" Margin="5 0 5 8" Text="{Binding GasQuantity, Delay=500, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                                <Button Background="Red" Command="{Binding RemoveGasElementCommand}" BorderThickness="0" Grid.Column="2" Margin="5 0 5 0" Height="40" Width="40">X</Button>
+                                <TextBlock Text="{Binding gasName}"/>
+                                <TextBox Grid.Column="1" Margin="5 0 5 8" Text="{Binding GasQuantity, Delay=500, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                             </Grid>
                         </DataTemplate>
                     </ListView.ItemTemplate>
@@ -89,19 +87,19 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Column="0" Grid.Row="0">
                 <Label>Скорость потока</Label>
-                <TextBox Style="{StaticResource verticalTB}"/>
+                <TextBox Style="{StaticResource verticalTB}" Text="{Binding FlowVelocity}"/>
                 <Label>Диаметр трубы</Label>
-                <TextBox Style="{StaticResource verticalTB}"/>
+                <TextBox Style="{StaticResource verticalTB}" Text="{Binding PipeDiameter}"/>
                 <Label>Кинематическая вязкость (исп.)</Label>
-                <TextBox Style="{StaticResource verticalTB}"/>
+                <TextBox Style="{StaticResource verticalTB}" Text="хуй там плавал("/>
                 <Label>Угол атаки</Label>
-                <TextBox Style="{StaticResource verticalTB}"/>
+                <TextBox Style="{StaticResource verticalTB}" Text="{Binding AttackAngle}"/>
                 <Label>Температура</Label>
-                <TextBox Style="{StaticResource verticalTB}"/>
+                <TextBox Style="{StaticResource verticalTB}" Text="{Binding Temperature}"/>
                 <Label>Расположение труб</Label>
                 <ComboBox ItemsSource="{Binding LocationQuery, Converter={StaticResource EnumToI}}" SelectedItem="{Binding LocationQuery}"/>
                 </StackPanel>
-            <Button Content="Рассчитать" Margin="10 0 10 0" Grid.Column="0" Grid.Row="1"/>
+            <Button Content="Рассчитать" Margin="10 0 10 0" Grid.Column="0" Grid.Row="1" Command="{Binding CalculateCommand}"/>
             </Grid>
         </materialDesign:Card>
         <Grid Grid.Column="2">
@@ -119,7 +117,7 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0">Число Рейнольдса</Label>
-                        <TextBlock Grid.Column="0">value</TextBlock>
+                        <TextBlock Grid.Column="0" Text="{Binding test}"/>
                         <Label Grid.Column="1">Значение угла атаки</Label>
                         <TextBlock Grid.Column="1">value</TextBlock>
                         <Label Grid.Column="2">Число Прандтля</Label>

@@ -11,6 +11,7 @@
         public double AttackAngle { get; set; }
 
         public double Temperature { get; set; }
+        public double AttackAngleValue { get; set; }
 
         public LocationQuery LocationQuery { get; set; }
     }
