@@ -1,40 +1,27 @@
-﻿using System.Runtime.CompilerServices;
+﻿using ConvTeploobmen.Client.Models;
+using System.Runtime.CompilerServices;
 using static System.Math;
 
 namespace ConvTeploobmen.MathLib
 {
-    public class MathLib
+    public class TeploobmenCalc
     {
         private readonly InputData _inputData;
 
-        #region tempSegment
-
-        private readonly Dictionary<double, double> _prs = new()
-        {
-            {0, 0.707},
-            {20,0.703}
-        };
-
-        private readonly Dictionary<double, double> _aas = new()
-        {
-            {10, 0.42},
-            {90,1}
-        };
-
-        #endregion
-        public MathLib(InputData inputData)
+        public TeploobmenCalc(InputData inputData)
         {
             _inputData = inputData;
         }
 
-        public double Calc()
+        public OutputData Calc()
         {
             var re = CalcRe();
             //Потом из WPF будут приходить нормальные цифры
-            var pr = TryGetPr(_inputData.Temperature);
-            var aas = TryGetAas(_inputData.AttackAngle);
+            var pr = _inputData.Prandtl;
+            var aas = _inputData.AttackAngleValue;
 
-            return CalcNu(re, aas, pr);
+            var res = new OutputData() { re=re, aas=aas, pr=pr, nu= CalcNu(re, aas, pr) };
+            return res;
         }
 
         private double CalcNu(double re, double aas, double pr)
@@ -51,13 +38,5 @@ namespace ConvTeploobmen.MathLib
         private double CalcRe() => _inputData.KinematicViscosity > 0
                 ? _inputData.FlowVelocity * _inputData.PipeDiameter / _inputData.KinematicViscosity
                 : throw new DivideByZeroException();
-
-        private double TryGetPr(double key) => _prs.TryGetValue(key, out var pr)
-                ? pr
-                : throw new ArgumentOutOfRangeException(nameof(key));
-
-        private double TryGetAas(double key) => _aas.TryGetValue(key, out var aa)
-                ? aa
-                : throw new ArgumentOutOfRangeException(nameof(key));
     }
 }

@@ -18,6 +18,9 @@ using ConvTeploobmen.Client.DataBase;
 using SQLitePCL;
 using System.Windows;
 using Windows.Security.Authentication.Web.Core;
+using System.Reflection.Metadata;
+using ConvTeploobmen.App.DataBase;
+using MaterialDesignThemes.Wpf.Converters;
 
 namespace ConvTeploobmen.Client.ViewModels
 {
@@ -37,11 +40,16 @@ namespace ConvTeploobmen.Client.ViewModels
                 "O2",
                 "N2"
             ];
+            _context = new ConvTeploobDbContext();
+            _calculateCommand = ReactiveCommand.Create(Calculate, this.WhenAnyValue(
+                vm => vm.TotalPercent,
+                vm => vm.FlowVelocity,
+                vm => vm.PipeDiameter,
+                vm => vm.AttackAngle,
+                vm => vm.Temperature)
+                .Select(x => x.Item1 == 100 && x.Item2 > 0 && x.Item3 > 0 && x.Item4 > 0 && x.Item5 > 0));
             foreach (var g in Gases)
             {
-                _context = new ConvTeploobDbContext();
-                _calculateCommand = ReactiveCommand.Create(Calculate);
-
                 var newGasEl = new GasElementViewModel(this, g);
                 GasElements.Add(newGasEl);
             }
@@ -198,18 +206,67 @@ namespace ConvTeploobmen.Client.ViewModels
         private void Calculate()
         {
 #pragma warning disable CS8602
-
+            //Найти значение угла атаки
             _inputData.AttackAngleValue = Getaav(_inputData.AttackAngle);
 
+            //Найти кинематическую вязкость для смеси газов
+            List<double> viscosities = [15e-6, 14.9e-6, 15.8e-6, 15.7e-6];
 
+            List<double> viscosityImportances = [];
+
+            for (int i = 0; i < GasElements.Count; i++)
+            {
+                viscosityImportances.Add( GasElements[i].GasQuantity * viscosities[i] / 100);
+            }
+
+            _inputData.KinematicViscosity = viscosityImportances.Sum();
+
+            //Найти число прандтля для текущей температуры
+            _inputData.Prandtl = GetPr(_inputData.Temperature);
+
+            var answers = new TeploobmenCalc(_inputData).Calc();
+
+            Re = answers.re;
+            Aas = answers.aas;
+            Pr = answers.pr;
+            Nu = answers.nu;
         }
-        private double Findaav(double mark, double angle)
+
+        //Находим нужные значения посредством аппроксимации
+        private double GetPr(double temperature)
         {
-            var deltatemp = angle % 10;
-            var valuemore = _context.AttackAngles.FirstOrDefault(a => a.Degree == mark).Value;
-            var valueless = _context.AttackAngles.FirstOrDefault(a => a.Degree == mark - 10).Value;
-            var value = valuemore - valueless;
-            var res = value / 10 * deltatemp + valueless;
+            if (temperature < -50)
+            {
+                MessageBox.Show("Указанная температура не охватывается базой данных");
+                return 0;
+            }
+
+            var res = _context.Prandtls.FirstOrDefault(p=>p.Temperature == temperature);
+            if (res!= null) return res.Value;
+
+            var temperatures = _context.Prandtls.ToList();
+            if (temperature > -50)
+            {
+                Prandtl mark2 = temperatures.Where(x => x.Temperature < Temperature).MaxBy(x => x.Temperature);
+                Prandtl mark1 = temperatures.Where(x => x.Temperature > Temperature).MinBy( x => x.Temperature);
+                return FindPr(mark1, mark2, temperature);
+            }
+            return temperatures[0].Value / 10 * temperature;
+        }
+
+        private double FindPr(Prandtl mark1, Prandtl mark2, double degree)
+        {
+            var deltaDegrees = degree - mark2.Temperature;
+            var value = mark1.Value - mark2.Value;
+            var res = value / (mark1.Temperature - mark2.Temperature) * deltaDegrees + mark2.Value;
+            return res;
+        }
+
+        private double Findaav(AttackAngle mark1, AttackAngle mark2, double angle)
+        {
+            var deltaangles = angle - mark2.Degree;
+            var value = mark1.Value - mark2.Value;
+            var res = value / 10 * deltaangles + mark2.Value;
             return res;
         }
 
@@ -226,28 +283,20 @@ namespace ConvTeploobmen.Client.ViewModels
                         .FirstOrDefault(a => a.Degree == angle)
                         .Value;
                 }
-                else
-                {
-                    int mark;
-                    var angles = _context.AttackAngles.ToArray();
-                    if (angle > 10)
-                    {
 
-                        for (int i = 0; i != angles.Length; i++)
+                var angles = _context.AttackAngles.ToList();
+                if (angle > 10) 
+                    for (int i = 0; i != angles.Count; i++)
+                    {
+                        if (angle < angles[i].Degree)
                         {
-                            if (angle < angles[i].Degree)
-                            {
-                                mark = (i + 1) * 10;
-                                return Findaav(mark, angle);
-                            }
+                            AttackAngle mark1 = angles[i];
+                            AttackAngle mark2 = angles[i - 1];
+                            return Findaav(mark1,mark2, angle);
                         }
                     }
-                    else
-                    {
-                        return angles[0].Value / 10 * angle;
-                    }
-                }
-            }return 0;
+                return angles[0].Value / 10 * angle;
+            }
         }
 #pragma warning restore CS8602
     }

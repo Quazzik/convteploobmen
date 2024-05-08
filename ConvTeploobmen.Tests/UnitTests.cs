@@ -4,7 +4,7 @@ namespace ConvTeploobmen.Tests
 {
     public class Tests
     {
-        private MathLib.MathLib _lib;
+        private MathLib.TeploobmenCalc _lib;
         private InputData _inputData;
 
         [SetUp]
@@ -35,7 +35,7 @@ namespace ConvTeploobmen.Tests
         public void TestIncorrectAngle()
         {
             _inputData.AttackAngle = -2;
-            var lib = new MathLib.MathLib(_inputData);
+            var lib = new MathLib.TeploobmenCalc(_inputData);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => lib.Calc());
             _inputData.AttackAngle = 90;
@@ -45,7 +45,7 @@ namespace ConvTeploobmen.Tests
         public void TestIncorrectTemperature()
         {
             _inputData.Temperature = -60;
-            var lib = new MathLib.MathLib(_inputData);
+            var lib = new MathLib.TeploobmenCalc(_inputData);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => lib.Calc());
             _inputData.Temperature = 20;
@@ -55,7 +55,7 @@ namespace ConvTeploobmen.Tests
         public void TestDivideByZero()
         {
             _inputData.KinematicViscosity = 0;
-            var lib = new MathLib.MathLib(_inputData);
+            var lib = new MathLib.TeploobmenCalc(_inputData);
 
             Assert.Throws<DivideByZeroException>(() => lib.Calc());
             _inputData.KinematicViscosity = 1;

@@ -27,7 +27,7 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         <Style TargetType="Label">
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Margin" Value="5 0 5 5"/>
+            <Setter Property="Margin" Value="5 0 5 0"/>
         </Style>
 
         <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignOverlineTextBlock}">
@@ -37,7 +37,7 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         </Style>
 
         <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}" x:Key="verticalTB">
-            <Setter Property="Margin" Value="0 5 0 0"/>
+            <Setter Property="Margin" Value="0 5 0 30"/>
         </Style>
 
         <Style TargetType="materialDesign:Card" x:Key="FirstCard">
@@ -76,7 +76,6 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                <Button Command="{Binding AddGasElementCommand}" Margin="10 10 10 0" Content="Добавить газ"></Button>
             </StackPanel>
         </materialDesign:Card>
         <materialDesign:Card Grid.Column="0" Grid.Row="0"  Style="{StaticResource FirstCard}" Padding="5">
@@ -86,18 +85,16 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Column="0" Grid.Row="0">
-                <Label>Скорость потока</Label>
-                <TextBox Style="{StaticResource verticalTB}" Text="{Binding FlowVelocity}"/>
-                <Label>Диаметр трубы</Label>
-                <TextBox Style="{StaticResource verticalTB}" Text="{Binding PipeDiameter}"/>
-                <Label>Кинематическая вязкость (исп.)</Label>
-                <TextBox Style="{StaticResource verticalTB}" Text="хуй там плавал("/>
-                <Label>Угол атаки</Label>
-                <TextBox Style="{StaticResource verticalTB}" Text="{Binding AttackAngle}"/>
-                <Label>Температура</Label>
-                <TextBox Style="{StaticResource verticalTB}" Text="{Binding Temperature}"/>
-                <Label>Расположение труб</Label>
-                <ComboBox ItemsSource="{Binding LocationQuery, Converter={StaticResource EnumToI}}" SelectedItem="{Binding LocationQuery}"/>
+                    <Label>Скорость потока</Label>
+                    <TextBox Style="{StaticResource verticalTB}" Text="{Binding FlowVelocity, UpdateSourceTrigger=PropertyChanged, Delay=500}"/>
+                    <Label>Диаметр трубы</Label>
+                    <TextBox Style="{StaticResource verticalTB}" Text="{Binding PipeDiameter, UpdateSourceTrigger=PropertyChanged, Delay=500}"/>
+                    <Label>Угол атаки</Label>
+                    <TextBox Style="{StaticResource verticalTB}" Text="{Binding AttackAngle, UpdateSourceTrigger=PropertyChanged, Delay=500}"/>
+                    <Label>Температура</Label>
+                    <TextBox Style="{StaticResource verticalTB}" Text="{Binding Temperature, UpdateSourceTrigger=PropertyChanged, Delay=500}"/>
+                    <Label>Расположение труб</Label>
+                    <ComboBox ItemsSource="{Binding LocationQuery, Converter={StaticResource EnumToI}}" SelectedItem="{Binding LocationQuery}"/>
                 </StackPanel>
             <Button Content="Рассчитать" Margin="10 0 10 0" Grid.Column="0" Grid.Row="1" Command="{Binding CalculateCommand}"/>
             </Grid>
@@ -117,13 +114,13 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0">Число Рейнольдса</Label>
-                        <TextBlock Grid.Column="0" Text="{Binding test}"/>
+                        <TextBlock Grid.Column="0" Text="{Binding Re}"/>
                         <Label Grid.Column="1">Значение угла атаки</Label>
-                        <TextBlock Grid.Column="1">value</TextBlock>
+                        <TextBlock Grid.Column="1" Text="{Binding Aas}"/>
                         <Label Grid.Column="2">Число Прандтля</Label>
-                        <TextBlock Grid.Column="2">value</TextBlock>
+                        <TextBlock Grid.Column="2" Text="{Binding Pr}"/>
                         <Label Grid.Column="3">Число Нуссельта</Label>
-                        <TextBlock Grid.Column="3">value</TextBlock>
+                        <TextBlock Grid.Column="3" Text="{Binding Nu}"/>
                     </Grid>
                 </StackPanel>
             </materialDesign:Card>
