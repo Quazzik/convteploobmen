@@ -125,8 +125,8 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                 </StackPanel>
             </materialDesign:Card>
             <materialDesign:Card Grid.Row="1" Style="{StaticResource FirstCard}">
-                <StackPanel>
-
+                <StackPanel Name="StPanel" Background="White">
+                    <Image Source="{Binding SelectedImage}" Height="{Binding ElementName=StPanel, Path=Height}" Width="{Binding ElementName=StPanel, Path=Width}" Stretch="UniformToFill"/>
                 </StackPanel>
             </materialDesign:Card>
         </Grid>

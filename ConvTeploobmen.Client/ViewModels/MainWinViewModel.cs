@@ -21,6 +21,9 @@ using Windows.Security.Authentication.Web.Core;
 using System.Reflection.Metadata;
 using ConvTeploobmen.App.DataBase;
 using MaterialDesignThemes.Wpf.Converters;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Runtime.CompilerServices;
 
 namespace ConvTeploobmen.Client.ViewModels
 {
@@ -31,9 +34,13 @@ namespace ConvTeploobmen.Client.ViewModels
         private const int MAX_ATTACK_ANGLE = 90;
         private InputData _inputData = new();
         private OutputData _outputData = new();
+        private ImageSource _selectedImage;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public MainWinViewModel()
         {
+            SelectedImage = GetImageSourceForLocation(LocationQuery.Шахматное);
             List<string> Gases = [
                 "CO2",
                 "H2O",
@@ -53,6 +60,41 @@ namespace ConvTeploobmen.Client.ViewModels
                 var newGasEl = new GasElementViewModel(this, g);
                 GasElements.Add(newGasEl);
             }
+
+            this.WhenAnyValue(vm => vm.LocationQuery).Subscribe(lc => { SelectedImage = GetImageSourceForLocation(lc); });
+        }
+
+        public ImageSource SelectedImage
+        {
+            get => _selectedImage;
+            set
+            {
+                if (_selectedImage != value)
+                {
+                    _selectedImage = value;
+                    this.RaisePropertyChanged(nameof(SelectedImage));
+                }
+            }
+        }
+
+        private ImageSource GetImageSourceForLocation(LocationQuery location)
+        {
+            string imagePath = "";
+            switch (location)
+            {
+                case LocationQuery.Коридорное:
+                    imagePath = "D:\\convteploobmen\\convteploobmen\\ConvTeploobmen.Client\\Public\\koridor.png";
+                    break;
+                case LocationQuery.Шахматное:
+                    imagePath = "D:\\convteploobmen\\convteploobmen\\ConvTeploobmen.Client\\Public\\shaxmat.png";
+                    break;
+            }
+            return new BitmapImage(new Uri(imagePath, System.UriKind.RelativeOrAbsolute));
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public double Nu
@@ -177,6 +219,8 @@ namespace ConvTeploobmen.Client.ViewModels
             get => _inputData.LocationQuery;
             set
             {
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedImage));
                 if (value == _inputData.LocationQuery)
                     return;
 
@@ -203,9 +247,9 @@ namespace ConvTeploobmen.Client.ViewModels
         private ReactiveCommand<Unit, Unit> _calculateCommand;
         public ReactiveCommand<Unit, Unit> CalculateCommand => _calculateCommand;
 
+#pragma warning disable CS8602
         private void Calculate()
         {
-#pragma warning disable CS8602
             //Найти значение угла атаки
             _inputData.AttackAngleValue = Getaav(_inputData.AttackAngle);
 
@@ -216,7 +260,7 @@ namespace ConvTeploobmen.Client.ViewModels
 
             for (int i = 0; i < GasElements.Count; i++)
             {
-                viscosityImportances.Add( GasElements[i].GasQuantity * viscosities[i] / 100);
+                viscosityImportances.Add(GasElements[i].GasQuantity * viscosities[i] / 100);
             }
 
             _inputData.KinematicViscosity = viscosityImportances.Sum();
@@ -247,8 +291,8 @@ namespace ConvTeploobmen.Client.ViewModels
             var temperatures = _context.Prandtls.ToList();
             if (temperature > -50)
             {
-                Prandtl mark2 = temperatures.Where(x => x.Temperature < Temperature).MaxBy(x => x.Temperature);
-                Prandtl mark1 = temperatures.Where(x => x.Temperature > Temperature).MinBy( x => x.Temperature);
+                Prandtl mark2 = temperatures.Last(x => x.Temperature < Temperature);
+                Prandtl mark1 = temperatures.First(x => x.Temperature > Temperature);
                 return FindPr(mark1, mark2, temperature);
             }
             return temperatures[0].Value / 10 * temperature;
@@ -276,24 +320,15 @@ namespace ConvTeploobmen.Client.ViewModels
             if (angle <= 0) { MessageBox.Show("Значение угла атаки указано неверно"); return 0; }
             else
             {
-                if (angle % 10 == 0)
-                {
-                    return _context
-                        .AttackAngles
-                        .FirstOrDefault(a => a.Degree == angle)
-                        .Value;
-                }
+                var res = _context.AttackAngles.FirstOrDefault(p => p.Degree== angle);
+                if (res != null) return res.Value;
 
                 var angles = _context.AttackAngles.ToList();
                 if (angle > 10) 
-                    for (int i = 0; i != angles.Count; i++)
                     {
-                        if (angle < angles[i].Degree)
-                        {
-                            AttackAngle mark1 = angles[i];
-                            AttackAngle mark2 = angles[i - 1];
+                            AttackAngle mark2= angles.Last(x => x.Degree < angle);
+                            AttackAngle mark1= angles.First(x => x.Degree > angle);
                             return Findaav(mark1,mark2, angle);
-                        }
                     }
                 return angles[0].Value / 10 * angle;
             }
