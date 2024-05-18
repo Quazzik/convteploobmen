@@ -110,6 +110,19 @@ namespace ConvTeploobmen.Client.ViewModels
             }
         }
 
+        public double Alpha
+        {
+            get => _outputData.alpha;
+            set
+            {
+                if (value == _outputData.alpha)
+                    return;
+
+                _outputData.alpha = value;
+                this.RaisePropertyChanged(nameof(Alpha));
+            }
+        }
+
         public double Pr
         {
             get => _outputData.pr;
@@ -196,7 +209,7 @@ namespace ConvTeploobmen.Client.ViewModels
                 if (value == _inputData.AttackAngle)
                     return;
 
-                _inputData.AttackAngle = value % MAX_ATTACK_ANGLE;
+                _inputData.AttackAngle = value % (MAX_ATTACK_ANGLE + 1);
                 this.RaisePropertyChanged(nameof(AttackAngle));
             }
         }
@@ -268,12 +281,16 @@ namespace ConvTeploobmen.Client.ViewModels
             //Найти число прандтля для текущей температуры
             _inputData.Prandtl = GetPr(_inputData.Temperature);
 
+            //TODO: добавить адекватное получение lambda
+            _inputData.Lambda = 1e-2;
+
             var answers = new TeploobmenCalc(_inputData).Calc();
 
             Re = answers.re;
             Aas = answers.aas;
             Pr = answers.pr;
             Nu = answers.nu;
+            Alpha = answers.alpha;
         }
 
         //Находим нужные значения посредством аппроксимации

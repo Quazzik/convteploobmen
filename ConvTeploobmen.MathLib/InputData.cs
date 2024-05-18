@@ -15,6 +15,7 @@
         public double AttackAngleValue { get; set; }
 
         public double Prandtl {  get; set; }
+        public double Lambda { get; set; }
 
         public LocationQuery LocationQuery { get; set; }
     }

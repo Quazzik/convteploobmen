@@ -12,5 +12,6 @@ namespace ConvTeploobmen.Client.Models
         public double aas { get; set; }
         public double pr { get; set; }
         public double nu { get; set; }
+        public double alpha { get; set; }
     }
 }

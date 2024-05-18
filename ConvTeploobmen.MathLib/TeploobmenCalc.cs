@@ -19,8 +19,9 @@ namespace ConvTeploobmen.MathLib
             //Потом из WPF будут приходить нормальные цифры
             var pr = Math.Round(_inputData.Prandtl,3);
             var aas = Math.Round(_inputData.AttackAngleValue,3);
+            var nu = CalcNu(re, aas, pr);
 
-            var res = new OutputData() { re=re, aas=aas, pr=pr, nu= CalcNu(re, aas, pr) };
+            var res = new OutputData() { re = re, aas = aas, pr = pr, nu = nu, alpha = CalcAlpha(nu)};
             return res;
         }
 
@@ -38,5 +39,7 @@ namespace ConvTeploobmen.MathLib
         private double CalcRe() => _inputData.KinematicViscosity > 0
                 ? Math.Round((_inputData.FlowVelocity * _inputData.PipeDiameter / _inputData.KinematicViscosity),3)
                 : throw new DivideByZeroException();
+
+        private double CalcAlpha(double nu) => _inputData.Lambda * nu / _inputData.PipeDiameter;
     }
 }
