@@ -65,7 +65,7 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                 <ListView ItemsSource="{Binding GasElements}" d:ItemsSource="{d:SampleData ItemCount=4}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Grid Width="178">
+                            <Grid Width="175">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>

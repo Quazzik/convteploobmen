@@ -28,8 +28,4 @@
     <ProjectReference Include="..\ConvTeploobmen.MathLib\ConvTeploobmen.MathLib.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
-
 </Project>

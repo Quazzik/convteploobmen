@@ -24,6 +24,7 @@ using MaterialDesignThemes.Wpf.Converters;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Runtime.CompilerServices;
+using Windows.ApplicationModel.VoiceCommands;
 
 namespace ConvTeploobmen.Client.ViewModels
 {
@@ -267,61 +268,71 @@ namespace ConvTeploobmen.Client.ViewModels
             _inputData.AttackAngleValue = Getaav(_inputData.AttackAngle);
 
             //Найти кинематическую вязкость для смеси газов
-            List<double> viscosities = [15e-6, 14.9e-6, 15.8e-6, 15.7e-6];
+            var viscositiesData = _context.ViscositiesKoeffs.ToList();
 
-            List<double> viscosityImportances = [];
-
-            for (int i = 0; i < GasElements.Count; i++)
+            var connector = new List<ConnectingType>();
+            foreach (var viscos in viscositiesData)
             {
-                viscosityImportances.Add(GasElements[i].GasQuantity * viscosities[i] / 100);
+                connector.Add(new ConnectingType { Name = viscos.GasName, Val1 = viscos.koeff1, Val2 = viscos.koeff2, Val3 = viscos.koeff3 });
             }
 
-            _inputData.KinematicViscosity = viscosityImportances.Sum();
+            _inputData.KinematicViscosity = CalcApproximBetter(connector);
 
-            //Найти число прандтля для текущей температуры
-            _inputData.Prandtl = GetPr(_inputData.Temperature);
+            //Найти теплопроводность для данной смеси газов
+            var ThermalConductivities = _context.ThermalConductancesKoeffs.ToList();
+            for (int i = 0; i < ThermalConductivities.Count; i++)
+            {
+                connector[i].Name = ThermalConductivities[i].GasName;
+                connector[i].Val1 = ThermalConductivities[i].koeff1;
+                connector[i].Val2 = ThermalConductivities[i].koeff2;
+                connector[i].Val3 = ThermalConductivities[i].koeff3;
+            }
 
-            //TODO: добавить адекватное получение lambda
-            _inputData.Lambda = 1e-2;
+            _inputData.ThermalConductivity = CalcApproximBetter(connector);
 
             var answers = new TeploobmenCalc(_inputData).Calc();
 
-            Re = answers.re;
-            Aas = answers.aas;
-            Pr = answers.pr;
-            Nu = answers.nu;
-            Alpha = answers.alpha;
+            Re = Math.Round(answers.re,3);
+            Aas = Math.Round(answers.aas,3);
+            Pr = Math.Round(answers.pr,3);
+            Nu = Math.Round(answers.nu,3);
+            Alpha = Math.Round(answers.alpha,3);
+
         }
+
+        private double CalcApproximBetter(List<ConnectingType> data)
+        {
+            var res = new List<double>([0,0,0,0]);
+            foreach (var d in data)
+            {
+                var value = CalcArgs(0, d.Val1, d.Val2, d.Val3, Temperature);
+                switch (d.Name)
+                {
+                    case "CO2":
+                        res[0] = value; break;
+                    case "H2O":
+                        res[1] = value; break;
+                    case "N2":
+                        res[2] = value; break;
+                    case "O2":
+                        res[3] = value; break;
+                }
+            }
+            return CalcImportances(res);
+        }
+
+        private double CalcImportances(List<double> values)
+        {
+            for(int i = 0; i<values.Count; i++)
+            {
+                values[i] = values[i] * GasElements[i].GasQuantity/100;
+            }
+            return values.Sum();
+        }
+
+        private double CalcArgs(double arg1, double arg2, double arg3, double arg4, double temp) => (arg1 * Math.Pow(temp, 3)) + (arg2 * Math.Pow(temp, 2)) + (arg3 * temp) + arg4;
 
         //Находим нужные значения посредством аппроксимации
-        private double GetPr(double temperature)
-        {
-            if (temperature < -50)
-            {
-                MessageBox.Show("Указанная температура не охватывается базой данных");
-                return 0;
-            }
-
-            var res = _context.Prandtls.FirstOrDefault(p=>p.Temperature == temperature);
-            if (res!= null) return res.Value;
-
-            var temperatures = _context.Prandtls.ToList();
-            if (temperature > -50)
-            {
-                Prandtl mark2 = temperatures.Last(x => x.Temperature < Temperature);
-                Prandtl mark1 = temperatures.First(x => x.Temperature > Temperature);
-                return FindPr(mark1, mark2, temperature);
-            }
-            return temperatures[0].Value / 10 * temperature;
-        }
-
-        private double FindPr(Prandtl mark1, Prandtl mark2, double degree)
-        {
-            var deltaDegrees = degree - mark2.Temperature;
-            var value = mark1.Value - mark2.Value;
-            var res = value / (mark1.Temperature - mark2.Temperature) * deltaDegrees + mark2.Value;
-            return res;
-        }
 
         private double Findaav(AttackAngle mark1, AttackAngle mark2, double angle)
         {
