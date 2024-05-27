@@ -1,30 +1,23 @@
-﻿using ConvTeploobmen.Client.ViewModels;
-using ConvTeploobmen.Client.Models;
+﻿using ConvTeploobmen.Client.Models;
 using ConvTeploobmen.MathLib;
-using DynamicData;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Printing;
-using Microsoft.EntityFrameworkCore;
 using ConvTeploobmen.Client.DataBase;
-using SQLitePCL;
 using System.Windows;
-using Windows.Security.Authentication.Web.Core;
-using System.Reflection.Metadata;
 using ConvTeploobmen.App.DataBase;
-using MaterialDesignThemes.Wpf.Converters;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+using OxyPlot.Wpf;
 using System.Runtime.CompilerServices;
-using Windows.ApplicationModel.VoiceCommands;
+using System.Windows.Controls;
 
 namespace ConvTeploobmen.Client.ViewModels
 {
@@ -36,11 +29,12 @@ namespace ConvTeploobmen.Client.ViewModels
         private InputData _inputData = new();
         private OutputData _outputData = new();
         private ImageSource _selectedImage;
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        private PlotModel _graphModel;
+        private List<(int angle, double result)> graphData = new List<(int angle, double result)>();
 
         public MainWinViewModel()
         {
+            GraphModel = new PlotModel{ Background = OxyColor.FromRgb(66, 66, 66) };
             SelectedImage = GetImageSourceForLocation(LocationQuery.Шахматное);
             List<string> Gases = [
                 "CO2",
@@ -49,13 +43,19 @@ namespace ConvTeploobmen.Client.ViewModels
                 "N2"
             ];
             _context = new ConvTeploobDbContext();
+
+            _graphCommand = ReactiveCommand.Create(CreateGraph, this.WhenAnyValue(
+                vm => vm.Alpha)
+                .Select(x => x != 0));
+
             _calculateCommand = ReactiveCommand.Create(Calculate, this.WhenAnyValue(
                 vm => vm.TotalPercent,
                 vm => vm.FlowVelocity,
                 vm => vm.PipeDiameter,
                 vm => vm.AttackAngle,
                 vm => vm.Temperature)
-                .Select(x => x.Item1 == 100 && x.Item2 > 0 && x.Item3 > 0 && x.Item4 > 0 && x.Item5 > 0));
+                .Select(x => x.Item1 == 100 && x.Item2 > 0 && x.Item3 > 0 && x.Item4 > 0 && x.Item5 > 99));
+
             foreach (var g in Gases)
             {
                 var newGasEl = new GasElementViewModel(this, g);
@@ -63,6 +63,67 @@ namespace ConvTeploobmen.Client.ViewModels
             }
 
             this.WhenAnyValue(vm => vm.LocationQuery).Subscribe(lc => { SelectedImage = GetImageSourceForLocation(lc); });
+        }
+
+        public PlotModel GraphModel
+        {
+            get => _graphModel;
+            set
+            {
+                if (_graphModel != value)
+                {
+                    _graphModel = value;
+                    this.RaisePropertyChanged(nameof(GraphModel));
+                }
+            }
+        }
+        private void CreateGraph()
+        {
+            var plotModel = new PlotModel();
+
+            var xAxis = new LinearAxis {
+                Position = AxisPosition.Left,
+                Minimum = graphData[0].result-2,
+                Maximum=graphData.Last().result+2,
+                Title="Конвективный коэффициент",
+                TitleColor=OxyColors.White,
+                TicklineColor=OxyColors.White,
+                AxislineColor = OxyColors.White,
+                TextColor = OxyColors.White
+            };
+
+            var yAxis = new LinearAxis {
+                Position = AxisPosition.Bottom,
+                Minimum = graphData[0].angle-2,
+                Maximum=graphData.Last().angle+2,
+                Title="Угол атаки",
+                TitleColor=OxyColors.White,
+                TicklineColor=OxyColors.White,
+                AxislineColor=OxyColors.White,
+                TextColor=OxyColors.White
+            };
+
+            var lineSeries = new LineSeries
+            {
+                MarkerType = MarkerType.Triangle,
+                MarkerSize = 4,
+                MarkerStroke = OxyColors.Black,
+                MarkerFill = OxyColor.FromRgb(205, 220, 57),
+                LineStyle = LineStyle.Dot,
+                Color = OxyColor.FromRgb(205, 220, 57),
+            };
+
+            foreach (var dataPoint in graphData)
+            {
+                lineSeries.Points.Add(new DataPoint(dataPoint.angle, dataPoint.result));
+            }
+            plotModel.Title = "Зависимость конфективного коэффициента от угла атаки";
+            plotModel.TitleColor = OxyColors.White;
+            plotModel.Axes.Add(xAxis);
+            plotModel.Axes.Add(yAxis);
+            plotModel.Series.Add(lineSeries);
+            plotModel.Background = OxyColor.FromRgb(66,66,66);
+            GraphModel = plotModel;
         }
 
         public ImageSource SelectedImage
@@ -91,11 +152,6 @@ namespace ConvTeploobmen.Client.ViewModels
                     break;
             }
             return new BitmapImage(new Uri(imagePath, System.UriKind.RelativeOrAbsolute));
-        }
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public double Nu
@@ -233,8 +289,8 @@ namespace ConvTeploobmen.Client.ViewModels
             get => _inputData.LocationQuery;
             set
             {
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(SelectedImage));
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(SelectedImage));
                 if (value == _inputData.LocationQuery)
                     return;
 
@@ -257,6 +313,10 @@ namespace ConvTeploobmen.Client.ViewModels
             get => _totalPercent;
             set => this.RaiseAndSetIfChanged(ref _totalPercent, value);
         }
+
+        private ReactiveCommand<Unit, Unit> _graphCommand;
+        public ReactiveCommand<Unit, Unit> GraphCommand => _graphCommand;
+
 
         private ReactiveCommand<Unit, Unit> _calculateCommand;
         public ReactiveCommand<Unit, Unit> CalculateCommand => _calculateCommand;
@@ -298,6 +358,15 @@ namespace ConvTeploobmen.Client.ViewModels
             Nu = Math.Round(answers.nu,3);
             Alpha = Math.Round(answers.alpha,3);
 
+            graphData.Clear();
+
+            var graphCalculateData = _inputData;
+            for (int angle = 10; angle <=90; angle += 10)
+            {
+                graphCalculateData.AttackAngleValue = Getaav(angle);
+                double res = new TeploobmenCalc(graphCalculateData).Calc().alpha;
+                graphData.Add((angle, res));
+            }
         }
 
         private double CalcApproximBetter(List<ConnectingType> data)

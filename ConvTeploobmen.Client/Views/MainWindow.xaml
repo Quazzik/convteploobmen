@@ -8,6 +8,7 @@
         xmlns:vms="clr-namespace:ConvTeploobmen.Client.ViewModels"
         xmlns:cnv="clr-namespace:ConvTeploobmen.Client.Converters"
         xmlns:local="clr-namespace:ConvTeploobmen.Client"
+        xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
 TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -15,9 +16,8 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
      TextElement.FontSize="13"
      TextOptions.TextFormattingMode="Ideal"
      TextOptions.TextRenderingMode="Auto"
-     Background="{DynamicResource MaterialDesignPaper}"
      FontFamily="{DynamicResource MaterialDesignFont}"
-        Title="MainWindow" Height="758" Width="1188">
+        Title="MainWindow" Height="758" Width="1188" Background="{DynamicResource MaterialDesignTextFieldBoxBackground}">
     <Window.Resources>
 
         <cnv:EnumToItemsConverter x:Key="EnumToI"/>
@@ -44,7 +44,7 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
             <Setter Property="UniformCornerRadius" Value="15"/>
             <Setter Property="Margin" Value="10"/>
         </Style>
-        
+
         <Style TargetType="StackPanel" x:Key="Vertical">
             <Setter Property="Orientation" Value="Vertical"/>
             <Setter Property="Margin" Value="5"/>
@@ -53,14 +53,14 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
     <Window.DataContext>
         <vms:MainWinViewModel/>
     </Window.DataContext>
-    <Grid>
+    <Grid Background="#FF77796B">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.3*"/>
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
         <materialDesign:Card Grid.Column="1" Style="{StaticResource FirstCard}">
-            <StackPanel Style="{StaticResource Vertical}">
+            <StackPanel Style="{StaticResource Vertical}" x:Name="StPanel1">
                 <Label HorizontalAlignment="Center" Content="{Binding TotalPercent, Converter ={StaticResource PercToS}}"></Label>
                 <ListView ItemsSource="{Binding GasElements}" d:ItemsSource="{d:SampleData ItemCount=4}">
                     <ListView.ItemTemplate>
@@ -79,7 +79,7 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
             </StackPanel>
         </materialDesign:Card>
         <materialDesign:Card Grid.Column="0" Grid.Row="0"  Style="{StaticResource FirstCard}" Padding="5">
-        <Grid>
+            <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="5*"/>
                     <RowDefinition Height="1*"/>
@@ -96,7 +96,8 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                     <Label>Расположение труб</Label>
                     <ComboBox ItemsSource="{Binding LocationQuery, Converter={StaticResource EnumToI}}" SelectedItem="{Binding LocationQuery}"/>
                 </StackPanel>
-            <Button Content="Рассчитать" Margin="10 0 10 0" Grid.Column="0" Grid.Row="1" Command="{Binding CalculateCommand}"/>
+                <Button Content="Рассчитать" Margin="10 -50 10 0" Grid.Column="0" Grid.Row="1" Command="{Binding CalculateCommand}"/>
+                <Button Content="Построить график" Margin="10 50 10 0" Grid.Column="0" Grid.Row="1" Command="{Binding GraphCommand}"/>
             </Grid>
         </materialDesign:Card>
         <Grid Grid.Column="2">
@@ -128,8 +129,8 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
                 </StackPanel>
             </materialDesign:Card>
             <materialDesign:Card Grid.Row="1" Style="{StaticResource FirstCard}">
-                <StackPanel Name="StPanel" Background="White">
-                    <Image Source="{Binding SelectedImage}" Height="{Binding ElementName=StPanel, Path=Height}" Width="{Binding ElementName=StPanel, Path=Width}" Stretch="UniformToFill"/>
+                <StackPanel Name="StPanel">
+                    <oxy:PlotView x:Name="PlotView" Grid.Row="0" Grid.Column="0"  Model="{Binding GraphModel}" Height="{Binding ActualHeight, ElementName=StPanel}"/>
                 </StackPanel>
             </materialDesign:Card>
         </Grid>
