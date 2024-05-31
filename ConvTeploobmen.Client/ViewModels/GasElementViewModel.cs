@@ -1,16 +1,4 @@
-﻿using ConvTeploobmen.Client.ViewModels;
-using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Reactive;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Specialized;
-using ABI.System.Collections.Generic;
-using ConvTeploobmen.Client.Models;
+﻿using ReactiveUI;
 
 namespace ConvTeploobmen.Client.ViewModels
 {

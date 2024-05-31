@@ -1,6 +1,4 @@
 ﻿using ConvTeploobmen.Client.Models;
-using System.Runtime.CompilerServices;
-using Windows.Devices.WiFiDirect;
 using static System.Math;
 
 namespace ConvTeploobmen.MathLib
@@ -23,7 +21,6 @@ namespace ConvTeploobmen.MathLib
         {
             var temp = _inputData.Temperature;
             var re = CalcRe();
-            //Потом из WPF будут приходить нормальные цифры
             var pr = (arg1 * Math.Pow(temp, 3))+(arg2 * Math.Pow(temp, 2))+(arg3 * temp)+arg4;
             var aas = _inputData.AttackAngleValue;
             var nu = CalcNu(re, aas, pr);

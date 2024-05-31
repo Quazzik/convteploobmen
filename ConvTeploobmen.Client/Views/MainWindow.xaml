@@ -22,7 +22,6 @@ TextElement.Foreground="{DynamicResource MaterialDesignBody}"
 
         <cnv:EnumToItemsConverter x:Key="EnumToI"/>
         <cnv:PercentToStringConverter x:Key="PercToS"/>
-        <cnv:StringToNumberConverter x:Key="StrToN"/>
 
         <Style TargetType="Label">
             <Setter Property="HorizontalAlignment" Value="Center"/>
